@@ -3,5 +3,5 @@
 
 ## 目录
 - [find_package的使用指南](FindPackage/README.md)
-- [导入外部依赖包的几种方式](ImportExternalLibrary/README.md)
+- [引入外部项目的几种方式](ImportExternalProject/README.md)
 
