@@ -1,0 +1,3 @@
+[submodule "ImportExternalProject/spdlog"]
+	path = ImportExternalProject/spdlog
+	url = https://github.com/gabime/spdlog.git
