@@ -6,6 +6,11 @@
 ```bash
 git submodule add https://github.com/gabime/spdlog.git
 ```
+本项目已经添加了submodule，所以在项目根目录执行以下命令初始化
+```bash
+git submodule init
+git submodule update
+```
 切换到我们需要的版本
 ```bash
 git checkout v1.4.2
