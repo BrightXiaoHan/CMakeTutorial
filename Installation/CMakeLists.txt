@@ -16,7 +16,7 @@ target_link_libraries(mymathapp mymath)
 target_include_directories(mymathapp PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
 # 改变安装路径可以使用下面的语句，Unix: "/usr/local", Windows: "c:/Program Files/${PROJECT_NAME}" 为默认值，所有的DESTINATION均以此目录为根目录
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/mymath)
+# set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/mymath)
 
 # 写入库的版本信息
 include(CMakePackageConfigHelpers)
@@ -39,11 +39,11 @@ install(TARGETS mymath mymathapp
 install(EXPORT MyMathTargets
         FILE MyLibTargets.cmake
         NAMESPACE MyMath::
-        DESTINATION lib/cmake/MyLib
+        DESTINATION lib/cmake/MyMath
         )
 
 configure_file(MyMathConfig.cmake.in MyMathConfig.cmake @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/MyMathConfig.cmake"
                 "${CMAKE_CURRENT_BINARY_DIR}/MyMathConfigVersion.cmake"
-        DESTINATION lib/cmake/MyLib
+        DESTINATION lib/cmake/MyMath
         )
