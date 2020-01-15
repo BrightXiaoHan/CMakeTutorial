@@ -12,12 +12,12 @@ endif(CURL_FOUND)
 
 find_package(glog)
 add_executable(glogtest glogtest.cc)
-if(CURL_FOUND)
+if(GLOG_FOUND)
     # 由于glog在连接时将头文件直接链接到了库里面，所以这里不用显示调用target_include_directories
     target_link_libraries(glogtest glog::glog)
-else(CURL_FOUND)
+else(GLOG_FOUND)
     message(FATAL_ERROR ”CURL library not found”)
-endif(CURL_FOUND)
+endif(GLOG_FOUND)
 
 # 将项目目录下的cmake文件夹加入到CMAKE_MODULE_PATH中，让find_pakcage能够找到我们自定义的函数库
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
