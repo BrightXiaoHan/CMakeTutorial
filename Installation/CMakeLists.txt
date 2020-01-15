@@ -37,7 +37,7 @@ install(TARGETS mymath mymathapp
 
 # 将库的相关信息输出为MyMathConfig.cmake，供find_package查找
 install(EXPORT MyMathTargets
-        FILE MyLibTargets.cmake
+        FILE MyMathTargets.cmake
         NAMESPACE MyMath::
         DESTINATION lib/cmake/MyMath
         )
