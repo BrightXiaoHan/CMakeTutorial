@@ -114,7 +114,7 @@ include(CMakeFindDependencyMacro)
 # set(my-config-var @my-config-var@)
 
 # 如果你的项目需要依赖其他的库，可以使用下面语句，用法与find_package相同
-find_dependency(MYDEP REQUIRED)
+# find_dependency(MYDEP REQUIRED)
 
 # Any extra setup
 
@@ -131,7 +131,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/MyMathConfig.cmake"
 ```
 最后我们在其他项目中，就可以使用
 ```cmake
-find_package(MyMath VERSION 1.0)
+find_package(MyMath 1.0)
 target_linked_library(otherapp MyMath::mymath)
 ```
 来引用我们的函数库了。
