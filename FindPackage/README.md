@@ -53,7 +53,7 @@ if(GLOG_FOUND)
     # 由于glog在连接时将头文件直接链接到了库里面，所以这里不用显示调用target_include_directories
     target_link_libraries(glogtest glog::glog)
 else(GLOG_FOUND)
-    message(FATAL_ERROR ”CURL library not found”)
+    message(FATAL_ERROR ”glog library not found”)
 endif(GLOG_FOUND)
 ```
 
