@@ -1,6 +1,43 @@
 # 使用包管理工具管理你的依赖库
 当依赖的项目较多时，手动安装相关依赖包较为复杂，并且多个项目多个版本的依赖包安装在系统中及容易造成冲突。若通过submodule的方式引入，下载编译耗时较长，同时也不好管理，对于还在开发过程中的项目来说影像效率。本文主要介绍两个帮助我们管理依赖库的工具的基本使用方法，抛砖引玉。它们分别是[vcpkg](https://github.com/microsoft/vcpkg)，Anaconda(https://www.anaconda.com/)
 
+## 一个简单的小程序
+我们写一个简单的展示图片的小程序
+```cpp
+#include <stdio.h>
+#include <opencv2/opencv.hpp>
+using namespace cv;
+int main(int argc, char** argv )
+{
+    if ( argc != 2 )
+    {
+        printf("usage: DisplayImage.out <Image_Path>\n");
+        return -1;
+    }
+    Mat image;
+    image = imread( argv[1], 1 );
+    if ( !image.data )
+    {
+        printf("No image data \n");
+        return -1;
+    }
+    namedWindow("Display Image", WINDOW_AUTOSIZE );
+    imshow("Display Image", image);
+    waitKey(0);
+    return 0;
+}
+```
+在CMakeLists.txt中，我们使用find_package(详见[find_package的使用指南](FindPackage/README.md))来引入opencv的库。
+```cmake
+cmake_minimum_required(VERSION 3.0)
+project( DisplayImage )
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( DisplayImage DisplayImage.cpp )
+target_link_libraries( DisplayImage ${OpenCV_LIBS} )
+```
+接下来我们使用vcpkg与anaconda两个工具安装opencv，并编译我们的项目。
+
 ## 使用vcpkg
 [vcpkg](https://github.com/microsoft/vcpkg) 是微软开源的一个库管理工具，并原生支持与cmake集成。vcpkg支持常见依赖库的一键安装，并支持cmake通过find_package一键引入。以下只介绍它的基础用法，具体文档请参考github [vcpkg](https://github.com/microsoft/vcpkg)
 ### 安装vcpkg
@@ -46,41 +83,6 @@ vcpkg install opencv
 ```
 vcpkg list
 ```
-我们写一个简单的展示图片的小程序
-```cpp
-#include <stdio.h>
-#include <opencv2/opencv.hpp>
-using namespace cv;
-int main(int argc, char** argv )
-{
-    if ( argc != 2 )
-    {
-        printf("usage: DisplayImage.out <Image_Path>\n");
-        return -1;
-    }
-    Mat image;
-    image = imread( argv[1], 1 );
-    if ( !image.data )
-    {
-        printf("No image data \n");
-        return -1;
-    }
-    namedWindow("Display Image", WINDOW_AUTOSIZE );
-    imshow("Display Image", image);
-    waitKey(0);
-    return 0;
-}
-```
-在CMakeLists.txt中，我们使用find_package(详见[find_package的使用指南](FindPackage/README.md))来引入opencv的库。
-```cmake
-cmake_minimum_required(VERSION 3.0)
-project( DisplayImage )
-find_package( OpenCV REQUIRED )
-include_directories( ${OpenCV_INCLUDE_DIRS} )
-add_executable( DisplayImage DisplayImage.cpp )
-target_link_libraries( DisplayImage ${OpenCV_LIBS} )
-```
-
 在配置的过程中，将vcpkg.cmake的路径赋值给`CMAKE_TOOLCHAIN_FILE`变量即可。
 ```bash
 VCPKG_HOME=/path/to/your_vcpkg/
