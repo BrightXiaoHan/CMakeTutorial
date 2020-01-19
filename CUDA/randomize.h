@@ -1,4 +1,3 @@
-
 /* Copyright (c) 1993-2015, NVIDIA CORPORATION. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,19 +24,9 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef __randomize_h__
+#define __randomize_h__
 
-#include <random>
+void randomize(float& x, float& y, float& z);
 
-namespace {
-  std::random_device randDevice;
-  std::minstd_rand engine(randDevice());
-  std::normal_distribution<float> normalDist(0, RAND_MAX);
-}
-
-
-void randomize(float& x, float& y, float& z)
-{
-  x = normalDist(engine);
-  y = normalDist(engine);
-  z = normalDist(engine);
-}
+#endif

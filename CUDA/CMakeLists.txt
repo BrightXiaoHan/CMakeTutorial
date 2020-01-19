@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
-project(cmake_and_cuda LANGUAGES CXX CUDA)
+enable_language(CUDA)
+project(cmake_and_cuda)
 
 include(CTest)
 
