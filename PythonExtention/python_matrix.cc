@@ -7,7 +7,7 @@ using namespace Eigen;
 typedef struct
 {
     PyObject_HEAD
-        MatrixXd matrix;
+    MatrixXd *matrix=nullptr;
 } PyMatrixObject;
 
 static PyObject *
@@ -32,67 +32,81 @@ PyMatrix_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         return NULL;
     }
 
-    MatrixXd mat(width, height);
-    self->matrix = mat;
+    self->matrix = new MatrixXd(width, height);
     return (PyObject *)self;
 }
 
-#define PARSE_MATRIX(m) ((PyMatrixObject *)m)->matrix
+static void
+*PyMatrix_dealloc(PyObject *obj)
+{
+    delete ((PyMatrixObject *)obj)->matrix; 
+    Py_TYPE(obj)->tp_free(obj);
+}
 
-#define RETURN_MATRIX(m, t)                              \
-    PyMatrixObject *c = PyObject_NEW(PyMatrixObject, t); \
-    c->matrix = m;                                       \
-    return (PyObject *)c
+
+inline MatrixXd *ParseMatrix(PyObject *obj){
+    return ((PyMatrixObject *)obj)->matrix;
+}
+
+inline PyObject *ReturnMatrix(MatrixXd *m, PyTypeObject *type){
+    PyMatrixObject *obj = PyObject_NEW(PyMatrixObject, type);
+    obj->matrix = m;
+    return (PyObject *)obj;
+}
 
 static PyObject *
 PyMatrix_add(PyObject *a, PyObject *b)
 {
-    MatrixXd matrix_a = PARSE_MATRIX(a);
-    MatrixXd matrix_b = PARSE_MATRIX(b);
+    MatrixXd *matrix_a = ParseMatrix(a);
+    MatrixXd *matrix_b = ParseMatrix(b);
 
-    if (matrix_a.cols() != matrix_b.cols() or matrix_a.rows() != matrix_b.rows()){
+    if (matrix_a->cols() != matrix_b->cols() or matrix_a->rows() != matrix_b->rows()){
         PyErr_SetString(PyExc_ValueError, "The input matrix must be the same shape.");
         return NULL;
     }
 
-    MatrixXd matrix_c = matrix_a + matrix_b;
-    RETURN_MATRIX(matrix_c, a->ob_type);
+    MatrixXd *matrix_c = new MatrixXd(matrix_a->cols(), matrix_b->rows());
+    *matrix_c = *matrix_a + *matrix_b;
+
+    return ReturnMatrix(matrix_c, a->ob_type);
 }
 
 static PyObject *
 PyMatrix_minus(PyObject *a, PyObject *b)
 {
-    MatrixXd matrix_a = PARSE_MATRIX(a);
-    MatrixXd matrix_b = PARSE_MATRIX(b);
+    MatrixXd *matrix_a = ParseMatrix(a);
+    MatrixXd *matrix_b = ParseMatrix(b);
 
-    if (matrix_a.cols() != matrix_b.cols() or matrix_a.rows() != matrix_b.rows()){
+    if (matrix_a->cols() != matrix_b->cols() or matrix_a->rows() != matrix_b->rows()){
         PyErr_SetString(PyExc_ValueError, "The input matrix must be the same shape.");
         return NULL;
     }
 
-    MatrixXd matrix_c = matrix_a - matrix_b;
-    RETURN_MATRIX(matrix_c, a->ob_type);
+    MatrixXd *matrix_c = new MatrixXd(matrix_a->cols(), matrix_b->rows());
+    *matrix_c = *matrix_a + *matrix_b;
+    return ReturnMatrix(matrix_c, a->ob_type);
 }
 
 static PyObject *
 PyMatrix_multiply(PyObject *a, PyObject *b)
 {
-    MatrixXd matrix_a = PARSE_MATRIX(a);
-    MatrixXd matrix_b = PARSE_MATRIX(b);
+    MatrixXd *matrix_a = ParseMatrix(a);
+    MatrixXd *matrix_b = ParseMatrix(b);
 
-    if (matrix_a.cols() != matrix_b.rows()){
+    if (matrix_a->cols() != matrix_b->rows()){
         PyErr_SetString(PyExc_ValueError, "The colonm rank of matrix A must be the same as the row rank of matrix B.");
         return NULL;
     }
-    MatrixXd matrix_c = matrix_a * matrix_b;
-    RETURN_MATRIX(matrix_c, a->ob_type);
+    MatrixXd *matrix_c = new MatrixXd(matrix_a->rows(), matrix_b->cols());
+    *matrix_c = (*matrix_a) * (*matrix_b);
+    return ReturnMatrix(matrix_c, a->ob_type);
 }
 
 static PyObject *PyMatrix_str(PyObject *a)
 {
-    MatrixXd matrix = PARSE_MATRIX(a);
+    MatrixXd *matrix = ParseMatrix(a);
     std::stringstream ss;
-    ss << matrix;
+    ss << *matrix;
     return Py_BuildValue("s", ss.str().c_str());
 }
 
@@ -144,8 +158,8 @@ PyObject *PyMatrix_data(PyObject *self, void *closure)
 {
 
     PyMatrixObject *obj = (PyMatrixObject *)self;
-    Py_ssize_t width = obj->matrix.cols();
-    Py_ssize_t height = obj->matrix.rows();
+    Py_ssize_t width = obj->matrix->cols();
+    Py_ssize_t height = obj->matrix->rows();
 
     PyObject *list = PyList_New(height);
     for (int i = 0; i < height; i++)
@@ -154,7 +168,7 @@ PyObject *PyMatrix_data(PyObject *self, void *closure)
 
         for (int j = 0; j < width; j++)
         {
-            PyObject *value = PyFloat_FromDouble(obj->matrix(i, j));
+            PyObject *value = PyFloat_FromDouble((*obj->matrix)(i, j));
             PyList_SetItem(internal, j, value);
         }
 
@@ -166,13 +180,13 @@ PyObject *PyMatrix_data(PyObject *self, void *closure)
 PyObject *PyMatrix_rows(PyObject *self, void *closure)
 {
     PyMatrixObject *obj = (PyMatrixObject *)self;
-    return Py_BuildValue("i", obj->matrix.rows());
+    return Py_BuildValue("i", obj->matrix->rows());
 }
 
 PyObject *PyMatrix_cols(PyObject *self, void *closure)
 {
     PyMatrixObject *obj = (PyMatrixObject *)self;
-    return Py_BuildValue("i", obj->matrix.cols());
+    return Py_BuildValue("i", obj->matrix->cols());
 }
 
 static PyGetSetDef MatrixGetSet[] = {
@@ -194,7 +208,7 @@ static PyTypeObject MatrixType = {
     PyVarObject_HEAD_INIT(nullptr, 0) "matrix.Matrix", /* tp_name */
     sizeof(PyMatrixObject),                            /* tp_basicsize */
     0,                                                 /* tp_itemsize */
-    nullptr,                                           /* tp_dealloc */
+    (destructor)PyMatrix_dealloc,                      /* tp_dealloc */
     nullptr,                                           /* tp_print */
     nullptr,                                           /* tp_getattr */
     nullptr,                                           /* tp_setattr */
@@ -233,21 +247,21 @@ static PyTypeObject MatrixType = {
 static PyObject *PyMatrix_ones(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyMatrixObject *m = (PyMatrixObject *)PyMatrix_new(&MatrixType, args, kwargs);
-    m->matrix.setOnes();
+    m->matrix->setOnes();
     return (PyObject *)m;
 }
 
 static PyObject *PyMatrix_zeros(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyMatrixObject *m = (PyMatrixObject *)PyMatrix_new(&MatrixType, args, kwargs);
-    m->matrix.setZero();
+    m->matrix->setZero();
     return (PyObject *)m;
 }
 
 static PyObject *PyMatrix_random(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyMatrixObject *m = (PyMatrixObject *)PyMatrix_new(&MatrixType, args, kwargs);
-    m->matrix.setRandom();
+    m->matrix->setRandom();
     return (PyObject *)m;
 }
 
@@ -277,7 +291,7 @@ static PyObject *PyMatrix_matrix(PyObject *self, PyObject *args)
         return nullptr;
     }
     int width = PyList_GET_SIZE(list);
-    MatrixXd p_mat(width, height);
+    MatrixXd *p_mat = new MatrixXd(width, height);
     for (int i = 0; i < height; i++)
     {
         PyObject *list = PyList_GET_ITEM(data, i);
@@ -302,11 +316,11 @@ static PyObject *PyMatrix_matrix(PyObject *self, PyObject *args)
                 PyErr_SetString(PyExc_ValueError, "Every elements of the matrix must float.");
                 return nullptr;
             }
-            p_mat(i, j) = ((PyFloatObject *)num)->ob_fval;
+            (*p_mat)(i, j) = ((PyFloatObject *)num)->ob_fval;
         }
     }
 
-    RETURN_MATRIX(p_mat, &MatrixType);
+    return ReturnMatrix(p_mat, &MatrixType);
 }
 
 static PyMethodDef matrixMethods[] = {

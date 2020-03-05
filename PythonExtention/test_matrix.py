@@ -1,7 +1,9 @@
 import matrix
 
-mat_a = matrix.random(10, 10)
-mat_b = matrix.random(10, 10)
+shape = 10
+
+mat_a = matrix.random(shape, shape)
+mat_b = matrix.random(shape, shape)
 
 print(mat_a * mat_b)
 print(mat_a + mat_b)
