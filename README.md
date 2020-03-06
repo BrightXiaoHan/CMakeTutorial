@@ -7,4 +7,5 @@
 - [安装](Installation/README.md)
 - [使用包管理工具管理你的依赖库](PackageManage/README.md)
 - [编写cuda应用程序](CUDA/README.md)
+- [编写Python的c/c++扩展](PythonExtention/README.md)
 
