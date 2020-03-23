@@ -10,7 +10,7 @@ else(CURL_FOUND)
     message(FATAL_ERROR "CURL library not found")
 endif(CURL_FOUND)
 
-find_package(glog)
+find_package(GLOG)
 add_executable(glogtest glogtest.cc)
 if(GLOG_FOUND)
     # 由于glog在连接时将头文件直接链接到了库里面，所以这里不用显示调用target_include_directories
