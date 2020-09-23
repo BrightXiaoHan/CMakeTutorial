@@ -9,3 +9,8 @@
 - [编写cuda应用程序](CUDA/README.md)
 - [编写Python的c/c++扩展](PythonExtention/README.md)
 
+## Github Pages
+[https://brightxiaohan.github.io/CMakeTutorial/](https://brightxiaohan.github.io/CMakeTutorial/)
+
+## 知乎博客地址
+[cmake 实用指南](https://zhuanlan.zhihu.com/c_200294809)
